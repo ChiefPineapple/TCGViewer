@@ -1,0 +1,10 @@
+[project]
+name = "TCGViewer"
+version = "0.1.0"
+description = "FastAPI App that helps export data from TCGPlayer Seller portal to be viewed with metabase"
+requires-python = ">=3.12"
+
+dependencies = [
+  "fastapi[all]",
+  "uvicorn[standard]",
+]
