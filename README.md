@@ -57,7 +57,7 @@ I found TCGPlayer's data reporting to be lacking, and I've recently started usin
 </div> -->
 <!-- Progress -->
 ### ✅ Progress
-
+Docker compose is working well spinning up metabase and the fastapi server, as well as the database they can both see. The API creates the database for TCGViewer as well as an admin user on start. There is a database table set up for passwords and uses hashing. Still need to finish login setup and tokens for more calls as well as user management endpoints. That should finish out the auth section.
 <!-- TechStack -->
 ### 🚀Tech Stack
 The stack runs in docker containers that are spun up via docker compose to have access to eachother. Making it fast and easy to deploy locally as well as providing scalability.
