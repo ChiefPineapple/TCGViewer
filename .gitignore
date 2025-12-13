@@ -1,4 +1,7 @@
-.mypy_cache
-/.vscode
+# Editors
+.vscode/
+.mypy_cache/
+# Environment
 .env
+# Python
 __pycache__/

@@ -36,6 +36,7 @@
 <!-- Table of Contents -->
 # Table of Contents
 - [About the Project](#about-the-project)
+  * [Progress](#progress)
   * [Tech Stack](#tech-stack)
   * [Features](#features)
   * [Environment Variables](#environment-variables)
@@ -54,6 +55,8 @@ I found TCGPlayer's data reporting to be lacking, and I've recently started usin
 <div align="center"> 
   <img src="https://placehold.co/600x400?text=Your+Screenshot+here" alt="screenshot" />
 </div> -->
+<!-- Progress -->
+### ✅ Progress
 
 <!-- TechStack -->
 ### 🚀Tech Stack
@@ -145,7 +148,7 @@ Ideally you'll have git on your deployment machine to clone the repository. (It'
 ```bash
   docker compose up -d
 ```
-
+4. Create your metabase user, then add the database via the database connection url in your .env file.
 
 <!-- Usage Guide -->
 <!--### Usage Guide -->
