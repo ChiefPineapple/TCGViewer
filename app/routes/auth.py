@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from typing import Annotated
-from models import users,SessionDep,logger
+from models import basicuser, status, users,SessionDep,logger,username
 from sqlmodel import Session,select
 from dotenv import load_dotenv
 import bcrypt
-import os 
+import jwt
+
 #loading environment variables
 load_dotenv(override=True)
 
@@ -14,11 +15,12 @@ router = APIRouter(prefix="/auth", tags=["Authorization + User Management"])
 
 #oath2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-salt = str(os.getenv('SALT')).encode('utf-8')
+
 #endpoint for logging into the application
 @router.post("/login")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],session: SessionDep) -> dict:
     try:
+        # getting the user
         logger.info(f"Given Username: {form_data.username}")
         result = session.exec(
             select(users).where(users.username==form_data.username)
@@ -27,9 +29,11 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],sessi
             logger.info('No user found')
             return ({"message": f"No User ({form_data.username}) found"})
         else:
+            # user found, verifying the pass against the hash
             bpass = form_data.password.encode('utf-8')
             if bcrypt.checkpw(bpass,result[0].password.encode('utf-8')):
                 logger.info('Good password!')
+                create_token(result)
                 return {"message": f"Login successful for user: {form_data.username}"}
             else:
                 logger.info('Bad password!')
@@ -39,24 +43,67 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],sessi
         raise HTTPException(status_code=500, detail=f"Error Logging in: {e}")
 
 
+# method for generating tokens
+def create_token(user: basicuser):
+    logger.info(f"Adding user: {user}")
+
+
 # ROUTES FOR USER MANAGEMENT-------------------------------------------------------------------------------------------------
 
-# function for adding a user
-def add_user(user_info: users,session: Session):
+
+# function for checking if a user exists
+def check_user(username: username, session: Session) -> bool:
+    logger.info(f"Checking user {username.username}")
     try:
-        print(f"Adding users {user_info.username}")
-        bpass = user_info.password.encode('utf-8') # encode the pass to bytes for hashing
-        salt = bcrypt.gensalt() # generate the salt
-        hash = bcrypt.hashpw(bpass,salt).decode('utf-8') # hash the pass, then decode for storage
-        print(f'Hash: {hash}')
-        user_info.password = str(hash) # type force to string for storage
-        session.add(user_info) # add and commit it to database
-        session.commit()
-        print(f"Added user {user_info.username}")
+        existing = session.exec(
+            select(users).where(users.username == username.username)
+        ).all()
+        if len(existing) == 1:
+            logger.info(f"User {username.username} exists")
+            return True
+        else:
+            return False
     except Exception as e:
+        logger.error(f"Error checking if user exists: {e}")
+        raise HTTPException(f"Error checking if user exists: {e}")
+
+
+# function for adding a user
+def add_user(user_info: users,session: Session) -> status:
+    try:
+        if not check_user(user_info.username,session):
+            bpass = user_info.password.encode('utf-8') # encode the pass to bytes for hashing
+            salt = bcrypt.gensalt() # generate the salt
+            hash = bcrypt.hashpw(bpass,salt).decode('utf-8') # hash the pass, then decode for storage
+            user_info.password = str(hash) # type force to string for storage
+            session.add(user_info) # add and commit it to database
+            session.commit()
+            logger.info(f"Added user {user_info.username}")
+            return status(detail=f"User {user_info.username} added")
+        else:
+            return status(detail=f"User {user_info.username} exists")
+    except Exception as e:
+        logger.error(f"Error adding user: {e}")
         raise HTTPException(status_code=500, detail=f"Error adding user: {e}")
 
 # add_user(users(username=os.getenv('API_User'),password=os.getenv('API_Password'),level='admin'),SessionDep)
 @router.post("/create-user")
-async def create_user(user_info: users, token: Annotated[str, Depends(oauth2_scheme)]):
-    return {"message": f"Added user: {user_info}"}
+async def create_user(user_info: Annotated[users, Form()],session: SessionDep):#token: Annotated[str, Depends(oauth2_scheme)]
+    return add_user(user_info,session)
+
+@router.delete("/remove-user")
+async def remove_user(username: Annotated[username,Form()],session: SessionDep):
+    logger.info(f"Remover called for user {username}")
+    try:
+        if check_user(username,session):
+            logger.info(f"User {username.username} exists")
+            user = session.get(users,username.username)
+            session.delete(user)
+            session.commit()
+            return status(detail=f"User {username.username} deleted")
+        else:
+            logger.info(f"User {username.username} doesn't exist")
+            return status(detail=f"User {username.username} doesn't exist")
+    except Exception as e:
+        logger.error(f"Error removing user: {e}")
+        raise HTTPException(status_code=500,detail=f"Error removing user: {e}")

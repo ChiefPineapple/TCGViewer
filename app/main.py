@@ -21,15 +21,7 @@ async def lifespan(app: FastAPI):
         SQLModel.metadata.create_all(engine) # creating database/tables
         try:
             with Session(engine) as session:
-                # checking if the admin user exists
-                existing = session.exec(
-                    select(users,users.username)
-                ).all()
-                if len(existing) == 1:
-                    logger.info("Admin user exists")
-                else:
-                    logger.info("Admin user doesnt exist")
-                    add_user(users(username=username,password=password,level='admin'),session) # if it doesn't exist, add it
+                add_user(users(username=username,password=password,level='admin'),session) # if it doesn't exist, add it
         except Exception as e:
             logger.error(f"Error adding admin user: {e}")
             yield

@@ -1,5 +1,6 @@
 from sqlmodel import Field,Session,create_engine,SQLModel
 from typing import Annotated
+from pydantic import BaseModel
 from enum import Enum
 from fastapi import Depends
 import os
@@ -21,11 +22,21 @@ class levels(Enum):
     admin = 'admin'
     standard = 'standard'
 
+class username(SQLModel):
+    username: str
+
+# basic user info
+class basicuser(username):
+    level: levels
+
 # users table for storing log ins
-class users(SQLModel, table=True):
+class users(basicuser, table=True):
     username: str = Field(primary_key=True)
     password: str
-    level: levels
+
+# basic class for status message
+class status(BaseModel):
+    detail: str
 
 #creating database and tables
 load_dotenv(override=True)
