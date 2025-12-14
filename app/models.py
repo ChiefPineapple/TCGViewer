@@ -39,9 +39,10 @@ class status(BaseModel):
     detail: str
 
 #creating database and tables
-load_dotenv(override=True)
+load_dotenv()
 url = os.getenv('DATABASE_URL')
 engine = create_engine(url)
+secret_key = os.getenv('TOKEN_KEY')
 
 # method for getting a session, utilized by SessionDep
 def get_session():

@@ -3,7 +3,7 @@ from routes.auth import router as auth_router,add_user
 from models import engine,users,logger
 import os
 from contextlib import asynccontextmanager
-from sqlmodel import Session,SQLModel,select
+from sqlmodel import Session,SQLModel
 
 #startup and shut down manager
 @asynccontextmanager
@@ -11,17 +11,17 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("Server Starting")
         # getting relevant environment variables
-        username = os.getenv("API_User")
-        password = os.getenv("API_Password")
+        env_username = os.getenv("API_User")
+        env_password = os.getenv("API_Password")
         url = os.getenv("DATABASE_URL")
         # checking if the environment variables are set
-        if not username or not password or not url:
+        if not env_username or not env_password or not url:
             logger.warning("Environment Variables not defined")
             yield  # fail silently or log warning
         SQLModel.metadata.create_all(engine) # creating database/tables
         try:
             with Session(engine) as session:
-                add_user(users(username=username,password=password,level='admin'),session) # if it doesn't exist, add it
+                add_user(users(username=env_username,password=env_password,level='admin'),session) # if it doesn't exist, add it
         except Exception as e:
             logger.error(f"Error adding admin user: {e}")
             yield
