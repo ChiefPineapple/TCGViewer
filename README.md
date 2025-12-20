@@ -57,7 +57,7 @@ I found TCGPlayer's data reporting to be lacking, and I've recently started usin
 </div> -->
 <!-- Progress -->
 ### ✅ Progress
-Docker compose is working well spinning up metabase and the fastapi server, as well as the database they can both see. The API creates the database for TCGViewer as well as an admin user on start. There is a database table set up for passwords and uses hashing. Still need to finish login setup and tokens for more calls as well as user management endpoints. That should finish out the auth section.
+We are on version 2.0! Version 1 was getting the containers for metabase, postgresql, and fastapi up and working together. Version 2.0 marks the completion of the Authentication/User Management routes. Now, you can manage users as long as you're an admin level account. (General flow being spin up the app, log in as default admin from env file credentials. Then create a new admin account or just create user accounts and keep the one admin account). The next steps will be creating a route and adding endpoints for the data collecting.
 <!-- TechStack -->
 ### 🚀Tech Stack
 The stack runs in docker containers that are spun up via docker compose to have access to eachother. Making it fast and easy to deploy locally as well as providing scalability.
@@ -78,8 +78,9 @@ The stack runs in docker containers that are spun up via docker compose to have 
 ### 💪Features
 - __Easy deployment:__ Can simply pull and deploy with docker and git. I've providing a simple guide for setting up.
 - __Scalable:__ Adjust your hardware to meet the size of your business, but is built to run on budget hardware for accessibility.
-- __FastAPI:__ utilizing FastAPI allows for the front and backend to be run together on one server, as well as easy asynchronous programming to improve the speed of all the data pulling + pushing that occurs in this project.
+- __FastAPI:__ Utilizing FastAPI allows for the front and backend to be run together on one server, as well as easy asynchronous programming to improve the speed of all the data pulling + pushing that occurs in this project.
 - __Metabase:__ Features Metabase, an open source tool with an active community. This means there are plenty of resources for learning to create your own more complicated reports if you desire. Or you can use the basic ones I showcase.
+- __Security:__ This app is meant to be internally hosted. It requires admin level access to do user management and JWT's to manage endpoint calling. If a token is stolen, it will be valid until it expires.
 
 
 <!-- Env Variables -->

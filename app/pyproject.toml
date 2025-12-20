@@ -11,5 +11,5 @@ dependencies = [
   "sqlmodel",
   "psycopg2-binary==2.9.11",
   "bcrypt",
-  "pyjwt",
+  "PyJWT>=2.10.1",
 ]
