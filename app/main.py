@@ -55,7 +55,7 @@ app = FastAPI(
     description="""
 This API is the backbone of the TCGViewer Project, it handles user management and web scraping to populate the database for report generation in metabase.
 """,
-version="1.0.0",
+version="2.0.0",
 lifespan=lifespan
 )
 
